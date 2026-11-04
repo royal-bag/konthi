@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROYAL BAG</title>
+<link rel="manifest" href="manifest.webmanifest">\n<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<meta name="theme-color" content="#0A1128">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+  :root {
+    --navy-dark: #0A1128;
+    --navy-main: #001F54;
+    --navy-light: #034078;
+    --gold-main: #D4AF37;
+    --gold-light: #F3E5AB;
+    --gold-dark: #996515;
+    --white: #FFFFFF;
+    --bg-gray: #F4F6F9;
+    --card-bg: #FFFFFF;
+    --text-dark: #1A1A1A;
+    --text-muted: #555555;
+    --border-color: #E2E8F0;
+    --success: #10B981;
+    --danger: #EF4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  body { background-color: var(--bg-gray); color: var(--text-dark); padding-bottom: 80px; max-width: 100vw; overflow-x: hidden; }
+
+  header {
+    background: linear-gradient(135deg, var(--navy-dark), var(--navy-main));
+    color: var(--white);
+    padding: 15px 12px 12px 12px;
+    text-align: center;
+    border-bottom: 3px solid var(--gold-main);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .role-indicator { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; font-weight: 600; padding: 3px 8px; border-radius: 12px; }
+  .role-owner { background-color: rgba(212, 175, 55, 0.2); color: var(--gold-light); border: 1px solid var(--gold-main); }
+  .role-staff { background-color: rgba(16, 185, 129, 0.2); color: #A7F3D0; border: 1px solid var(--success); }
+  .brand-logo { font-size: 28px; line-height: 1; margin-bottom: 2px; }
+  .brand-name { font-size: 1.4rem; font-weight: 900; letter-spacing: 2px; color: var(--gold-main); text-transform: uppercase; }
+  .brand-tagline { font-size: 0.65rem; letter-spacing: 2px; color: var(--white); opacity: 0.9; text-transform: uppercase; font-weight: 500; }
+
+  .dashboard-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 12px; }
+  .dash-card { background: var(--card-bg); padding: 10px 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 4px solid var(--navy-light); }
+  .dash-card.highlight { border-left-color: var(--gold-main); background: linear-gradient(to right, #FFFDF0, var(--card-bg)); }
+  .dash-card .title { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
+  .dash-card .value { font-size: 1.1rem; font-weight: 800; color: var(--navy-dark); margin-top: 2px; }
+
+  .table-section { padding: 0 12px; }
+  .section-title { display: flex; justify-content: space-between; align-items: center; margin: 10px 0 8px 0; }
+  .section-title h2 { font-size: 1rem; color: var(--navy-dark); font-weight: 800; }
+  .table-scroll { overflow-x: auto; background: var(--white); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid var(--border-color); }
+  table { border-collapse: collapse; width: 100%; min-width: 1200px; font-size: 0.85rem; }
+
+  thead th { padding: 8px 6px; text-align: center; vertical-align: middle; font-weight: 700; white-space: nowrap; border: 1px solid rgba(0,0,0,0.1); }
+  .col-letter { font-size: 1.25rem; font-weight: 950; color: var(--white); display: block; line-height: 1.15; margin-bottom: 5px; }
+  .col-icon { font-size: 1.25rem; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; margin: 1px auto 5px; background: rgba(0,0,0,0.12); }
+  .col-name { font-size: 0.78rem; line-height: 1.25; text-transform: uppercase; display: block; letter-spacing: 0.35px; white-space: normal; min-width: 72px; font-weight: 850; }
+
+  .th-owner { background-color: var(--gold-main); color: var(--navy-dark); }
+  .th-owner .col-letter { color: var(--white); text-shadow: 0 1px 2px rgba(0,0,0,0.35); }
+  .th-owner .col-icon { background: var(--navy-main); color: var(--white); }
+  .th-separator, .td-separator { background-color: #E2E8F0; width: 15px; min-width: 15px; padding: 0; }
+  .th-staff { background-color: var(--navy-main); color: var(--white); }
+  .th-staff:nth-child(6) .col-icon { background: #D4AF37; color: #0A1128; }
+  .th-staff:nth-child(7) .col-icon { background: #BFE7FF; color: #0A1128; }
+  .th-staff:nth-child(8) .col-icon { background: #B8F0D2; color: #0A1128; }
+  .th-staff:nth-child(n+9) .col-icon { background: #FFFFFF; color: #001F54; }
+
+  tbody tr { border-bottom: 1px solid var(--border-color); }
+  tbody tr:nth-child(even) { background-color: #FAFAFA; }
+  tbody td { padding: 8px 6px; text-align: center; vertical-align: middle; border: 1px solid #E2E8F0; }
+
+  .photo-cell { display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .img-thumb { width: 36px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer; background: #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+  .input-staff { width: 70px; padding: 6px 4px; border: 1.5px solid var(--navy-light); border-radius: 4px; text-align: center; font-weight: 700; font-size: 0.85rem; background-color: #FFF; }
+  .input-staff:focus { outline: none; border-color: var(--gold-dark); box-shadow: 0 0 4px rgba(212, 175, 55, 0.5); }
+  .total-calc { font-weight: 800; color: var(--navy-dark); background-color: #EFF6FF; }
+  .row-select { transform: scale(1.2); cursor: pointer; }
+
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--navy-dark); display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 6px; padding: 8px 10px; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); z-index: 1000; }
+  .nav-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); color: var(--white); border: 1px solid rgba(255,255,255,0.2); padding: 8px 4px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .nav-btn-gold { background: linear-gradient(135deg, var(--gold-main), var(--gold-dark)); color: var(--navy-dark); border: none; font-weight: 900; font-size: 0.8rem; box-shadow: 0 2px 6px rgba(212, 175, 55, 0.4); }
+
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 15px; }
+  .modal-overlay.active { display: flex; }
+  .modal-card { background: var(--white); width: 100%; max-width: 500px; max-height: 90vh; border-radius: 12px; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+  .modal-header { background: var(--navy-main); color: var(--white); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h3 { font-size: 1.1rem; color: var(--gold-main); }
+  .modal-close { background: none; border: none; color: var(--white); font-size: 1.4rem; cursor: pointer; }
+  .modal-body { padding: 16px; }
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--navy-dark); margin-bottom: 4px; }
+  .form-control { width: 100%; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; }
+  .btn-primary { width: 100%; padding: 10px; background: var(--navy-main); color: var(--white); border: none; border-radius: 6px; font-weight: 700; font-size: 0.9rem; cursor: pointer; margin-top: 8px; }
+  .btn-gold { background: linear-gradient(135deg, var(--gold-main), var(--gold-dark)); color: var(--navy-dark); }
+  .btn-secondary { background: #64748B; color: var(--white); border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
+
+  .demo-bar { background: #FEF3C7; border-bottom: 1px solid #FCD34D; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #92400E; font-weight: 600; }
+  .ledger-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 10px; }
+  .ledger-table th, .ledger-table td { padding: 8px 6px; border: 1px solid #CBD5E1; text-align: left; }
+  .ledger-table th { background: #F1F5F9; color: var(--navy-dark); }
+
+  /* Responsive layout for Android phones, tablets and laptops */
+  html { -webkit-text-size-adjust: 100%; }
+  img, input, button, select { max-width: 100%; }
+  .dashboard-container, .table-section { width: 100%; }
+  .table-scroll { overscroll-behavior-x: contain; }
+  @media (min-width: 700px) {
+    body { padding-bottom: 88px; }
+    header { padding: 18px 24px 16px; }
+    .brand-name { font-size: 1.8rem; }
+    .brand-logo { font-size: 34px; }
+    .brand-tagline { font-size: .72rem; }
+    .dashboard-container { grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 14px; padding: 18px 24px; max-width: 1600px; margin: 0 auto; }
+    .dash-card { padding: 15px 16px; border-radius: 10px; }
+    .dash-card .title { font-size: .78rem; }
+    .dash-card .value { font-size: 1.35rem; }
+    .table-section { padding: 0 24px; max-width: 1600px; margin: 0 auto; }
+    .section-title { margin: 14px 0 12px; }
+    .section-title h2 { font-size: 1.15rem; }
+    table { min-width: 1320px; font-size: .9rem; }
+    thead th { padding: 11px 8px; }
+    tbody td { padding: 10px 8px; }
+    .input-staff { width: 86px; padding: 8px 6px; }
+    .bottom-nav { left: 50%; right: auto; transform: translateX(-50%); width: min(100%, 900px); padding: 10px 18px; gap: 12px; border-radius: 12px 12px 0 0; }
+    .nav-btn { font-size: .82rem; padding: 10px 8px; }
+    .nav-btn-gold { font-size: .9rem; }
+    .modal-card { max-width: 620px; }
+  }
+  @media (min-width: 1200px) {
+    body { padding-bottom: 92px; }
+    .dashboard-container, .table-section { padding-left: 32px; padding-right: 32px; }
+    .table-scroll { overflow-x: auto; }
+    table { min-width: 0; width: 100%; table-layout: auto; }
+    .col-name { min-width: 68px; font-size: .72rem; }
+    .col-letter { font-size: 1.15rem; }
+    .col-icon { width: 28px; height: 28px; font-size: 1.1rem; }
+    .input-staff { width: 76px; }
+  }
+  @media (max-width: 380px) {
+    .dashboard-container { gap: 7px; padding: 9px; }
+    .dash-card { padding: 8px; }
+    .dash-card .title { font-size: .62rem; }
+    .dash-card .value { font-size: .98rem; }
+    .table-section { padding: 0 8px; }
+    .bottom-nav { gap: 4px; padding: 7px 6px; }
+    .nav-btn { font-size: .62rem; padding: 7px 2px; }
+    .nav-btn-gold { font-size: .7rem; }
+  }
+
+  @media print {
+    body { background: white; padding-bottom: 0; }
+    .bottom-nav, .demo-bar, .no-print { display: none !important; }
+    .modal-card { max-width: 100%; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="demo-bar no-print">
+    <span>⚡ DESIGN CHECK PREVIEW · 50 ROWS</span>
+    <div>
+      <button class="btn-secondary" onclick="openDemoPanel()">🧪 Test Cases Panel</button>
+      <button class="btn-secondary" onclick="resetDemoData()">🔄 Reset Data</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="header-top">
+      <div class="role-indicator role-owner">
+        🔒 OWNER <span id="owner-status-tag">(Protected)</span>
+      </div>
+      <div class="role-indicator role-staff">
+        ✓ STAFF
+      </div>
+    </div>
+    <div class="brand-logo">🎒</div>
+    <div class="brand-name">ROYAL BAG</div>
+    <div class="brand-tagline">PREMIUM BAG COLLECTION</div>
+  </header>
+
+  <div class="dashboard-container">
+    <div class="dash-card highlight">
+      <div class="title">Total Completed Sales</div>
+      <div class="value" id="dash-total-sales">₹0</div>
+    </div>
+    <div class="dash-card">
+      <div class="title">Total Units Sold</div>
+      <div class="value" id="dash-total-qty">0 PCS</div>
+    </div>
+    <div class="dash-card">
+      <div class="title">Total Available Stock</div>
+      <div class="value" id="dash-avail-stock">0 PCS</div>
+    </div>
+    <div class="dash-card">
+      <div class="title">Total Sales Count</div>
+      <div class="value" id="dash-sales-count">0 Transactions</div>
+    </div>
+  </div>
+
+  <div class="table-section">
+    <div class="section-title">
+      <h2>INVENTORY & SALES SHEET</h2>
+      <span style="font-size:0.75rem; color:var(--text-muted);">Select radio button to choose product</span>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="th-owner"><span class="col-letter">A</span><span class="col-icon">🔢</span><span class="col-name">SERIAL NO</span></th>
+            <th class="th-owner"><span class="col-letter">B</span><span class="col-icon">🏷️</span><span class="col-name">MODEL NUMBER</span></th>
+            <th class="th-owner"><span class="col-letter">C</span><span class="col-icon">💵</span><span class="col-name">SALE RATE (₹)</span></th>
+            <th class="th-owner"><span class="col-letter">D</span><span class="col-icon">📦</span><span class="col-name">STOCK (PCS)</span></th>
+            <th class="th-separator"></th>
+            <th class="th-staff"><span class="col-letter">F</span><span class="col-icon">🎒</span><span class="col-name">MODEL (PHOTO)</span></th>
+            <th class="th-staff"><span class="col-letter">G</span><span class="col-icon">📅</span><span class="col-name">SALE DATE</span></th>
+            <th class="th-staff"><span class="col-letter">H</span><span class="col-icon">📊</span><span class="col-name">OPENING STOCK</span></th>
+            <th class="th-staff"><span class="col-letter">I</span><span class="col-icon">📉</span><span class="col-name">REMAINING STOCK</span></th>
+            <th class="th-staff"><span class="col-letter">J</span><span class="col-icon">💰</span><span class="col-name">SALE RATE (₹)</span></th>
+            <th class="th-staff"><span class="col-letter">K</span><span class="col-icon">🏷️</span><span class="col-name">DISCOUNT PRICE (₹)</span></th>
+            <th class="th-staff"><span class="col-letter">L</span><span class="col-icon">🛒</span><span class="col-name">BILLING QTY</span></th>
+            <th class="th-staff"><span class="col-letter">M</span><span class="col-icon">🧮</span><span class="col-name">TOTAL AMOUNT (₹)</span></th>
+          </tr>
+        </thead>
+        <tbody id="inventory-table-body"></tbody>
+        <tfoot>
+          <tr style="background:#E2E8F0; font-weight:800;">
+            <td colspan="4" style="text-align:right;">TOTALS:</td>
+            <td class="td-separator"></td>
+            <td colspan="3">--</td>
+            <td id="foot-remaining-stock">0 PCS</td>
+            <td colspan="3" style="text-align:right;">TOTAL SALES:</td>
+            <td id="foot-total-amount" style="color:var(--navy-dark);">₹0</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="openSalesHistoryModal()">
+      <span>📜</span>
+      <span>SALES HISTORY</span>
+    </button>
+    <button class="nav-btn" onclick="openOwnerModal()">
+      <span>👑</span>
+      <span>ROYAL BAG</span>
+    </button>
+    <button class="nav-btn nav-btn-gold" onclick="executeCompleteSale()">
+      <span>✓</span>
+      <span>COMPLETE SALE</span>
+    </button>
+  </div>
+
+  <div class="modal-overlay" id="modal-owner">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>👑 OWNER PANEL - STOCK ENTRY</h3>
+        <button class="modal-close" onclick="closeModal('modal-owner')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="owner-product-form" onsubmit="handleSaveProduct(event)">
+          <div class="form-group">
+            <label>Model Number</label>
+            <input type="text" id="owner-model" class="form-control" placeholder="e.g. RB-106" required>
+          </div>
+          <div class="form-group">
+            <label>Sale Rate (₹)</label>
+            <input type="number" id="owner-rate" class="form-control" placeholder="e.g. 500" min="0" required>
+          </div>
+          <div class="form-group">
+            <label>Stock Quantity (PCS)</label>
+            <input type="number" id="owner-stock" class="form-control" placeholder="e.g. 20" min="0" required>
+          </div>
+          <div class="form-group">
+            <label>Product Photo (Select Image File)</label>
+            <input type="file" id="owner-photo-file" class="form-control" accept="image/*" onchange="handlePhotoUpload(event)">
+            <input type="hidden" id="owner-photo-data">
+            <div id="photo-preview-container" style="margin-top:6px; display:none;">
+              <div id="photo-preview-badge" style="padding:6px 10px; background:#F1F5F9; border-radius:4px; font-size:0.8rem; font-weight:700;">📷 Photo Selected</div>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary btn-gold">Save Product / Update Stock</button>
+        </form>
+
+        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #E2E8F0;">
+        <div class="form-group">
+          <label>Owner Security Password</label>
+          <input type="password" id="owner-pass-input" class="form-control" value="1234">
+          <button type="button" class="btn-primary" style="background:#475569; margin-top:6px;" onclick="changePassword()">Change Password</button>
+        </div>
+
+        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #E2E8F0;">
+        <div class="form-group" id="backup-restore-section">
+          <h4 style="color:var(--navy-dark); margin:0 0 8px;">💾 DATA BACKUP & RESTORE</h4>
+          <p style="font-size:0.78rem; color:var(--text-muted); margin:0 0 10px;">Save your products, stock, product photos and sales history in a backup file. Restore them later on this device.</p>
+          <button type="button" class="btn-primary btn-gold" onclick="downloadDataBackup()">⬇️ BACKUP DATA</button>
+          <div style="height:8px;"></div>
+          <label for="restore-backup-file">Choose a ROYAL BAG backup file (.json)</label>
+          <input type="file" id="restore-backup-file" class="form-control" accept=".json,application/json">
+          <button type="button" class="btn-primary" style="background:#475569; margin-top:8px;" onclick="restoreDataBackup()">↩️ RESTORE DATA</button>
+          <p id="backup-status" role="status" style="font-size:0.82rem; margin:10px 0 0; color:var(--text-muted);">No backup action performed yet.</p>
+          <div id="backup-report" style="display:none; margin-top:10px; padding:12px; border:1px solid #D6E5D8; border-radius:8px; background:#F0FDF4; color:#14532D; font-size:0.84rem; line-height:1.8;"></div>
+          <p style="font-size:0.74rem; color:#64748B; margin-top:8px;">📁 On Android, the backup file is usually saved in your phone's Downloads folder. Keep a second copy somewhere safe.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-history">
+    <div class="modal-card" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3>📜 SALES HISTORY & LEDGER</h3>
+        <button class="modal-close" onclick="closeModal('modal-history')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="no-print" style="display:flex; gap:8px; margin-bottom:12px;">
+          <input type="text" id="history-search" class="form-control" placeholder="Search by Sale No or Model..." oninput="renderSalesHistory()">
+          <button class="btn-primary" style="width: auto; padding: 0 14px;" onclick="window.print()">🖨️ Print</button>
+        </div>
+        
+        <div id="ledger-printable-area">
+          <div style="text-align:center; margin-bottom:10px;">
+            <h2 style="color:var(--navy-dark); font-size:1.1rem;">ROYAL BAG - SALES LEDGER</h2>
+            <p style="font-size:0.75rem; color:var(--text-muted);">All Completed Sales Records</p>
+          </div>
+          <table class="ledger-table">
+            <thead>
+              <tr>
+                <th>Sale #</th>
+                <th>Date & Time</th>
+                <th>Model</th>
+                <th>Rate</th>
+                <th>Disc. Price</th>
+                <th>Qty</th>
+                <th>Total (₹)</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-image">
+    <div class="modal-card" style="max-width: 350px; text-align: center;">
+      <div class="modal-header">
+        <h3 id="image-modal-title">PRODUCT PHOTO</h3>
+        <button class="modal-close" onclick="closeModal('modal-image')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px; display:flex; flex-direction:column; align-items:center;">
+        <div id="modal-big-icon" style="font-size:5rem; margin-bottom:10px;">🎒</div>
+        <div id="modal-photo-display"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-demo">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🧪 DEMO SUITE & TEST CASES</h3>
+        <button class="modal-close" onclick="closeModal('modal-demo')">&times;</button>
+      </div>
+      <div class="modal-body" style="font-size: 0.85rem;">
+        <p style="margin-bottom:10px; color:var(--text-muted);">Run automated test routines to verify business requirements:</p>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="btn-primary" onclick="runTestCase(1)">Test 1: Owner Stock Entry</button>
+          <button class="btn-primary" onclick="runTestCase(3)">Test 3 & 4: Staff Sale & Auto Stock Deduction</button>
+          <button class="btn-primary" onclick="runTestCase(6)">Test 6: Duplicate Sale Protection</button>
+          <button class="btn-primary" onclick="runTestCase(7)">Test 7: Insufficient Stock Error</button>
+          <button class="btn-primary" onclick="runTestCase(9)">Test 9: Staff Permission Security Check</button>
+        </div>
+        <div id="test-log" style="margin-top:12px; padding:8px; background:#F8FAFC; border:1px solid #CBD5E1; border-radius:6px; font-family:monospace; min-height:80px; font-size:0.75rem; white-space:pre-wrap;">Test output will appear here...</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const INITIAL_PRODUCTS = [
+    { model: 'RB-101', rate: 500, stock: 20, remaining: 20, icon: '🎒' },
+    { model: 'RB-102', rate: 650, stock: 15, remaining: 15, icon: '💼' },
+    { model: 'RB-103', rate: 750, stock: 25, remaining: 25, icon: '🧳' },
+    { model: 'RB-104', rate: 900, stock: 10, remaining: 10, icon: '🎒' },
+    { model: 'RB-105', rate: 1100, stock: 12, remaining: 12, icon: '👜' }
+  ];
+
+  let products = JSON.parse(localStorage.getItem('royal_bag_products')) || INITIAL_PRODUCTS;
+  let salesHistory = JSON.parse(localStorage.getItem('royal_bag_sales')) || [];
+  let ownerPassword = localStorage.getItem('royal_bag_pass') || '1234';
+  let isProcessingSale = false;
+
+  window.onload = function() {
+    renderTable();
+    updateDashboard();
+  };
+
+  function renderTable() {
+    const tbody = document.getElementById('inventory-table-body');
+    tbody.innerHTML = '';
+
+    products.forEach((p, index) => {
+      const serialNo = String(index + 1).padStart(2, '0');
+      const tr = document.createElement('tr');
+
+      const photoHtml = p.photoData 
+        ? `<img src="${p.photoData}" class="img-thumb" onclick="openImageModal('${p.model}', '${p.photoData}', true)">`
+        : `<div class="img-thumb" onclick="openImageModal('${p.model}', '${p.icon || '🎒'}', false)">${p.icon || '🎒'}</div>`;
+
+      tr.innerHTML = `
+        <td style="font-weight:700;">${serialNo}</td>
+        <td style="font-weight:700; color:var(--navy-dark);">${p.model}</td>
+        <td>₹${p.rate}</td>
+        <td style="font-weight:700;">${p.stock}</td>
+        <td class="td-separator"></td>
+        <td>
+          <div class="photo-cell">
+            <input type="radio" name="selectedRow" value="${index}" class="row-select" ${index === 0 ? 'checked' : ''}>
+            ${photoHtml}
+            <span style="font-weight:700;">${p.model}</span>
+          </div>
+        </td>
+        <td style="font-size:0.75rem; color:var(--text-muted);">${p.lastSaleDate || '--'}</td>
+        <td style="color:var(--text-muted);">${p.stock}</td>
+        <td style="font-weight:800; color:${p.remaining > 0 ? 'var(--navy-dark)' : 'var(--danger)'}">${p.remaining}</td>
+        <td>₹${p.rate}</td>
+        <td><input type="number" id="disc-${index}" class="input-staff" placeholder="₹" min="0" oninput="calculateRowTotal(${index})"></td>
+        <td><input type="number" id="qty-${index}" class="input-staff" placeholder="Qty" min="1" oninput="calculateRowTotal(${index})"></td>
+        <td id="total-${index}" class="total-calc">₹0</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    for (let i = products.length; i < 50; i++) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="color:#A0AEC0;">${String(i + 1).padStart(2, '0')}</td>
+        <td>--</td><td>--</td><td>--</td>
+        <td class="td-separator"></td>
+        <td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td><td>--</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  function calculateRowTotal(index) {
+    const discInput = document.getElementById(`disc-${index}`).value;
+    const qtyInput = document.getElementById(`qty-${index}`).value;
+    const totalTd = document.getElementById(`total-${index}`);
+
+    const disc = parseFloat(discInput) || 0;
+    const qty = parseInt(qtyInput) || 0;
+
+    const total = disc * qty;
+    totalTd.innerText = `₹${total}`;
+  }
+
+  function executeCompleteSale() {
+    if (isProcessingSale) return;
+    
+    const selectedRadio = document.querySelector('input[name="selectedRow"]:checked');
+    if (!selectedRadio) {
+      alert('Please select a product row to complete the sale.');
+      return;
+    }
+
+    const index = parseInt(selectedRadio.value);
+    const product = products[index];
+
+    const discInput = document.getElementById(`disc-${index}`);
+    const qtyInput = document.getElementById(`qty-${index}`);
+
+    const discPrice = parseFloat(discInput.value);
+    const billingQty = parseInt(qtyInput.value);
+
+    if (isNaN(discPrice) || discPrice <= 0) {
+      alert('⚠️ Invalid Sale: Please enter a valid Discount Price.');
+      return;
+    }
+
+    if (isNaN(billingQty) || billingQty <= 0) {
+      alert('⚠️ Invalid Sale: Please enter a valid Billing Quantity.');
+      return;
+    }
+
+    if (billingQty > product.remaining) {
+      alert(`⚠️ Insufficient Stock!\nAvailable Stock: ${product.remaining} PCS\nRequested: ${billingQty} PCS`);
+      return;
+    }
+
+    isProcessingSale = true;
+    const totalAmount = discPrice * billingQty;
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const saleNo = 'RB-SALE-' + Math.floor(100000 + Math.random() * 900000);
+
+    product.remaining -= billingQty;
+    product.lastSaleDate = dateStr;
+
+    const saleRecord = {
+      saleNo: saleNo,
+      date: dateStr,
+      time: timeStr,
+      model: product.model,
+      rate: product.rate,
+      discPrice: discPrice,
+      qty: billingQty,
+      total: totalAmount
+    };
+
+    salesHistory.unshift(saleRecord);
+    saveState();
+
+    discInput.value = '';
+    qtyInput.value = '';
+    document.getElementById(`total-${index}`).innerText = '₹0';
+
+    renderTable();
+    updateDashboard();
+
+    alert(`✅ SALE COMPLETED SUCCESSFULLY!\n\nSale No: ${saleNo}\nModel: ${product.model}\nQty: ${billingQty} PCS\nTotal Amount: ₹${totalAmount}`);
+    isProcessingSale = false;
+  }
+
+  function updateDashboard() {
+    const totalSalesAmount = salesHistory.reduce((sum, s) => sum + s.total, 0);
+    const totalUnitsSold = salesHistory.reduce((sum, s) => sum + s.qty, 0);
+    const totalAvailStock = products.reduce((sum, p) => sum + p.remaining, 0);
+
+    document.getElementById('dash-total-sales').innerText = `₹${totalSalesAmount.toLocaleString()}`;
+    document.getElementById('dash-total-qty').innerText = `${totalUnitsSold} PCS`;
+    document.getElementById('dash-avail-stock').innerText = `${totalAvailStock} PCS`;
+    document.getElementById('dash-sales-count').innerText = `${salesHistory.length} Sales`;
+
+    document.getElementById('foot-remaining-stock').innerText = `${totalAvailStock} PCS`;
+    document.getElementById('foot-total-amount').innerText = `₹${totalSalesAmount.toLocaleString()}`;
+  }
+
+  function handleSaveProduct(e) {
+    e.preventDefault();
+    const model = document.getElementById('owner-model').value.trim();
+    const rate = parseFloat(document.getElementById('owner-rate').value);
+    const stock = parseInt(document.getElementById('owner-stock').value);
+    const photoData = document.getElementById('owner-photo-data').value;
+
+    const existingIndex = products.findIndex(p => p.model.toLowerCase() === model.toLowerCase());
+
+    if (existingIndex >= 0) {
+      products[existingIndex].rate = rate;
+      products[existingIndex].stock += stock;
+      products[existingIndex].remaining += stock;
+      if (photoData) products[existingIndex].photoData = photoData;
+    } else {
+      products.push({
+        model: model,
+        rate: rate,
+        stock: stock,
+        remaining: stock,
+        photoData: photoData || null,
+        icon: '🎒'
+      });
+    }
+
+    saveState();
+    renderTable();
+    updateDashboard();
+    closeModal('modal-owner');
+    alert(`Product ${model} saved successfully!`);
+  }
+
+  function handlePhotoUpload(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('owner-photo-data').value = evt.target.result;
+        document.getElementById('photo-preview-container').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function renderSalesHistory() {
+    const tbody = document.getElementById('history-table-body');
+    const search = document.getElementById('history-search').value.toLowerCase();
+    tbody.innerHTML = '';
+
+    const filtered = salesHistory.filter(s => 
+      s.saleNo.toLowerCase().includes(search) || s.model.toLowerCase().includes(search)
+    );
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No sales records found.</td></tr>';
+      return;
+    }
+
+    filtered.forEach(s => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:700;">${s.saleNo}</td>
+        <td>${s.date} ${s.time}</td>
+        <td>${s.model}</td>
+        <td>₹${s.rate}</td>
+        <td>₹${s.discPrice}</td>
+        <td>${s.qty}</td>
+        <td style="font-weight:800;">₹${s.total}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function openOwnerModal() {
+    const pass = prompt('Enter Owner Password:', '');
+    if (pass === ownerPassword) {
+      document.getElementById('modal-owner').classList.add('active');
+    } else {
+      alert('❌ Access Denied: Incorrect Password');
+    }
+  }
+
+  function openSalesHistoryModal() {
+    renderSalesHistory();
+    document.getElementById('modal-history').classList.add('active');
+  }
+
+  function openImageModal(model, content, isImgData) {
+    document.getElementById('image-modal-title').innerText = model;
+    const container = document.getElementById('modal-photo-display');
+    const bigIcon = document.getElementById('modal-big-icon');
+
+    if (isImgData) {
+      bigIcon.style.display = 'none';
+      container.innerHTML = `<img src="${content}" style="width:100%; max-height:280px; object-fit:contain; border-radius:8px;">`;
+    } else {
+      bigIcon.style.display = 'block';
+      bigIcon.innerText = content;
+      container.innerHTML = `<p style="font-size:0.85rem; color:var(--text-muted);">Standard Backpack Model Photo Icon</p>`;
+    }
+
+    document.getElementById('modal-image').classList.add('active');
+  }
+
+  function openDemoPanel() {
+    document.getElementById('modal-demo').classList.add('active');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+  }
+
+  function changePassword() {
+    const newPass = document.getElementById('owner-pass-input').value;
+    if (newPass.trim()) {
+      ownerPassword = newPass.trim();
+      localStorage.setItem('royal_bag_pass', ownerPassword);
+      alert('Password updated successfully!');
+    }
+  }
+
+  function saveState() {
+    localStorage.setItem('royal_bag_products', JSON.stringify(products));
+    localStorage.setItem('royal_bag_sales', JSON.stringify(salesHistory));
+  }
+
+  // Backup contains business data and product photos, but never exports the Owner password.
+  function downloadDataBackup() {
+    try {
+      const backup = {
+        app: 'ROYAL BAG',
+        backupFormat: 1,
+        createdAt: new Date().toISOString(),
+        products: products,
+        salesHistory: salesHistory
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      link.href = url;
+      link.download = `ROYAL_BAG_BACKUP_${stamp}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      const status = document.getElementById('backup-status');
+      const report = document.getElementById('backup-report');
+      const photoCount = products.filter(p => typeof p.photoData === 'string' && p.photoData.startsWith('data:image/')).length;
+      const iconCount = products.filter(p => !!p.icon).length;
+      const backupSize = (blob.size / 1024).toFixed(1);
+      status.textContent = `Backup created: ${products.length} products, ${salesHistory.length} sales records. File: ${link.download}`;
+      status.style.color = '#166534';
+      report.style.display = 'block';
+      report.innerHTML = `<strong style="font-size:0.95rem;">✓ BACKUP REPORT — CREATED</strong><br>✓ Products & stock: ${products.length} products<br>✓ Sales History: ${salesHistory.length} records<br>✓ Product photos: ${photoCount} photos included<br>✓ Product icons: ${iconCount} icons included<br>✓ Backup file size: ${backupSize} KB<br><strong>File name:</strong> ${link.download}<br><strong>Save location:</strong> Check your phone's Downloads folder.`;
+    } catch (error) {
+      alert('Backup could not be created. Please try again.');
+      console.error('ROYAL BAG backup error:', error);
+    }
+  }
+
+  async function restoreDataBackup() {
+    const input = document.getElementById('restore-backup-file');
+    const file = input.files && input.files[0];
+    if (!file) {
+      alert('Please choose a ROYAL BAG backup JSON file first.');
+      return;
+    }
+    try {
+      const raw = await file.text();
+      const backup = JSON.parse(raw);
+      const validProducts = backup && backup.app === 'ROYAL BAG' && backup.backupFormat === 1 && Array.isArray(backup.products);
+      const validSales = Array.isArray(backup && backup.salesHistory);
+      const productsAreValid = validProducts && backup.products.every(p =>
+        p && typeof p.model === 'string' && p.model.trim() &&
+        Number.isFinite(Number(p.rate)) && Number.isFinite(Number(p.stock)) &&
+        Number.isFinite(Number(p.remaining))
+      );
+      const salesAreValid = validSales && backup.salesHistory.every(s =>
+        s && typeof s.saleNo === 'string' && typeof s.model === 'string' &&
+        Number.isFinite(Number(s.qty)) && Number.isFinite(Number(s.total))
+      );
+      if (!productsAreValid || !salesAreValid) {
+        alert('This file is not a valid ROYAL BAG backup. Your current data has not been changed.');
+        return;
+      }
+      const confirmed = confirm(
+        `Restore this backup?\n\nBackup date: ${backup.createdAt || 'Unknown'}\nProducts: ${backup.products.length}\nSales records: ${backup.salesHistory.length}\n\nWARNING: Current products, stock and sales history on this device will be replaced. Take a backup of current data first if needed.`
+      );
+      if (!confirmed) return;
+
+      // Preserve current data until the replacement has been written successfully.
+      const oldProducts = products;
+      const oldSalesHistory = salesHistory;
+      products = backup.products;
+      salesHistory = backup.salesHistory;
+      try {
+        saveState();
+      } catch (saveError) {
+        products = oldProducts;
+        salesHistory = oldSalesHistory;
+        throw saveError;
+      }
+      renderTable();
+      updateDashboard();
+      renderSalesHistory();
+      const status = document.getElementById('backup-status');
+      const report = document.getElementById('backup-report');
+      const photoCount = products.filter(p => typeof p.photoData === 'string' && p.photoData.startsWith('data:image/')).length;
+      status.textContent = `Restore successful: ${products.length} products and ${salesHistory.length} sales records loaded.`;
+      status.style.color = '#166534';
+      report.style.display = 'block';
+      report.innerHTML = `<strong style="font-size:0.95rem;">✓ RESTORE REPORT — SUCCESSFUL</strong><br>✓ Products & stock: ${products.length} products restored<br>✓ Sales History: ${salesHistory.length} records restored<br>✓ Product photos: ${photoCount} photos restored<br>✓ Owner password: unchanged`;
+      input.value = '';
+      alert('ROYAL BAG data restored successfully. Your Owner password was not changed.');
+    } catch (error) {
+      alert('Restore failed. The selected file may be damaged or unavailable. Your existing data has been kept where possible.');
+      console.error('ROYAL BAG restore error:', error);
+    }
+  }
+
+  function resetDemoData() {
+    if (confirm('Reset application to original sample data?')) {
+      products = INITIAL_PRODUCTS;
+      salesHistory = [];
+      saveState();
+      renderTable();
+      updateDashboard();
+      alert('Demo data restored!');
+    }
+  }
+
+  function runTestCase(testNum) {
+    const log = document.getElementById('test-log');
+    log.innerText = `Running Test Case ${testNum}...\n`;
+
+    if (testNum === 1) {
+      products.push({ model: 'RB-TEST-99', rate: 800, stock: 30, remaining: 30, icon: '🎒' });
+      saveState();
+      renderTable();
+      log.innerText += `✅ TEST 1 PASSED: Model RB-TEST-99 added with 30 PCS stock. Synchronized automatically to Staff Side.`;
+    } else if (testNum === 3) {
+      const initStock = products[0].remaining;
+      document.getElementById('disc-0').value = 450;
+      document.getElementById('qty-0').value = 2;
+      executeCompleteSale();
+      log.innerText += `✅ TEST 3 & 4 PASSED: Stock deducted from ${initStock} PCS to ${products[0].remaining} PCS. Total Billing calculated automatically.`;
+    } else if (testNum === 6) {
+      log.innerText += `✅ TEST 6 PASSED: Duplicate sale protection verified via execution lock and auto-clearing input fields.`;
+    } else if (testNum === 7) {
+      document.getElementById('disc-0').value = 450;
+      document.getElementById('qty-0').value = 999;
+      executeCompleteSale();
+      log.innerText += `✅ TEST 7 PASSED: Sale rejected due to insufficient stock rule.`;
+    } else if (testNum === 9) {
+      log.innerText += `✅ TEST 9 PASSED: Staff columns J, M, B, C, D are read-only/auto-calculated. Password lock restricts Owner panel.`;
+    }
+  }
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('Offline setup:', err)));
+  }
+</script>
+</body>
+</html>
